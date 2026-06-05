@@ -31,6 +31,7 @@ class MutliHeadAttention(nn.Module):
         qkv = qkv.permute(0, 2, 1, 3)
         q, k, v = qkv.chunk(3, dim=-1)
         values, attention = scaled_dot_product(q, k, v, mask)
+        values = values.permute(0,2,1,3)
         values = values.reshape(batch_size, max_sequence_length, self.num_heads * self.head_dim)
         out = self.linear_layer(values)
         return out 
@@ -81,11 +82,12 @@ class EncoderLayer(nn.Module):
         self.dropout2 = nn.Dropout(p=drop_prob)
     
     def forward(self, x, self_attention_mask):
-        residual_x = x.clone()
+        residual_x = x
         x = self.attention(x, mask=self_attention_mask)
         x = self.dropout1(x)
         x = self.norm1(x + residual_x)
-        residual_x = x.clone()
+
+        residual_x = x
         x = self.ffn(x)
         x = self.dropout2(x)
         x = self.norm2(x + residual_x)

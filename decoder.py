@@ -66,6 +66,7 @@ class MultiHeadAtention(nn.Module):
         qkv = qkv.permute(0, 2, 1, 3)
         q, k, v = qkv.chunk(3, dim=-1)
         values, attention = scaled_dot_product(q, k, v, mask)
+        values = values.permute(0,2,1,3)
         values = values.reshape(batch_size, squence_length, self.num_heads * self.head_dim)
         out = self.linear_layer(values)
         return out
@@ -91,6 +92,7 @@ class MultiHeadCrossAtention(nn.Module):
         q = q.permute(0, 2, 1, 3)
         k, v = kv.chunk(2, dim=-1)
         values, attention = scaled_dot_product(q, k, v, mask)
+        values = values.permute(0,2,1,3)
         values = values.reshape(batch_size, squence_length, d_model)
         out = self.linear_layer(values)
         return out
