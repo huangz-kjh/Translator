@@ -2,12 +2,14 @@ import torch
 import math
 from torch import nn
 import torch.nn.functional as F
+from sentence_tokenization import SentenceEmbedding
 
-def sacled_dot_product(q, k, v, mask=None):
-    d_k = q.size(-1)
+def scaled_dot_product(q, k, v, mask=None):
+    d_k = q.size()[-1]
     scaled = torch.matmul(q, k.transpose(-1, -2)) / math.sqrt(d_k)
     if mask is not None:
-        scaled += mask
+        scaled = scaled.permute(1, 0, 2, 3) + mask
+        scaled = scaled.permute(1, 0, 2, 3)
     attention = F.softmax(scaled, dim=-1)
     values = torch.matmul(attention, v)
     return values, attention
@@ -28,7 +30,7 @@ class MutliHeadAttention(nn.Module):
         qkv = qkv.reshape(batch_size, max_sequence_length, self.num_heads, 3 * self.head_dim)
         qkv = qkv.permute(0, 2, 1, 3)
         q, k, v = qkv.chunk(3, dim=-1)
-        values, attention = sacled_dot_product(q, k, v, mask)
+        values, attention = scaled_dot_product(q, k, v, mask)
         values = values.reshape(batch_size, max_sequence_length, self.num_heads * self.head_dim)
         out = self.linear_layer(values)
         return out 
@@ -78,27 +80,56 @@ class EncoderLayer(nn.Module):
         self.norm2 = Normalnize(parameters_shape=[d_model])
         self.dropout2 = nn.Dropout(p=drop_prob)
     
-    def forward(self, x):
-        residual_x = x
-        x = self.attention(x)
+    def forward(self, x, self_attention_mask):
+        residual_x = x.clone()
+        x = self.attention(x, mask=self_attention_mask)
         x = self.dropout1(x)
         x = self.norm1(x + residual_x)
-
-        residual_x = x
+        residual_x = x.clone()
         x = self.ffn(x)
         x = self.dropout2(x)
         x = self.norm2(x + residual_x)
         return x
 
-class Encoder(nn.Module):
+# class Encoder(nn.Module):
 
-    def __init__(self, d_model, ffn_hidden, num_heads, drop_prob, nums_layers):
-        super().__init__()
-        self.layers = nn.Sequential(*[EncoderLayer(d_model, ffn_hidden, num_heads, drop_prob)
-                                      for _ in range(nums_layers)])
+#     def __init__(self, d_model, ffn_hidden, num_heads, drop_prob, nums_layers):
+#         super().__init__()
+#         self.layers = nn.Sequential(*[EncoderLayer(d_model, ffn_hidden, num_heads, drop_prob)
+#                                       for _ in range(nums_layers)])
         
-    def forward(self, x):
-        x = self.layers(x)
+#     def forward(self, x):
+#         x = self.layers(x)
+#         return x
+
+class SequentialEncoder(nn.Sequential):
+    def forward(self, *inputs):
+        x, self_attention_mask  = inputs
+        for module in self._modules.values():
+            x = module(x, self_attention_mask)
+        return x
+
+class Encoder(nn.Module):
+    def __init__(self, 
+                 d_model, 
+                 ffn_hidden, 
+                 num_heads, 
+                 drop_prob, 
+                 num_layers,
+                 max_sequence_length,
+                 language_to_index,
+                 language,
+                 START_TOKEN,
+                 END_TOKEN, 
+                 PADDING_TOKEN):
+        super().__init__()
+        self.sentence_embedding = SentenceEmbedding(max_sequence_length, d_model, language_to_index, language, START_TOKEN, END_TOKEN, PADDING_TOKEN)
+        self.layers = SequentialEncoder(*[EncoderLayer(d_model, ffn_hidden, num_heads, drop_prob)
+                                      for _ in range(num_layers)])
+
+    def forward(self, x, self_attention_mask, start_token, end_token):
+        x = self.sentence_embedding(x, start_token, end_token)
+        x = self.layers(x, self_attention_mask)
         return x
 
 if __name__ == '__main__':

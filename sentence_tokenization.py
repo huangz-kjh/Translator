@@ -88,7 +88,7 @@ def is_valid_eng_length(sentence, max_sequence_length):
 
 class TextDataset(Dataset):
 
-    def __init__(self, english_sentens, chinese_sentences):
+    def __init__(self, english_sentences, chinese_sentences):
         super().__init__()
         self.english_sentences = english_sentences
         self.chinese_sentences = chinese_sentences
@@ -202,8 +202,8 @@ class SentenceEmbedding(nn.Module):
         tokenized = torch.stack(tokenized)
         return tokenized.to(get_device())
     
-    def forward(self, x, end_token=True):
-        x = self.batch_tokenize(x, end_token)
+    def forward(self, x, start_token=True, end_token=True):
+        x = self.batch_tokenize(x, start_token, end_token)
         x = self.embedding(x)
         pos = self.position_encoder().to(get_device())
         x = self.dropout(x + pos)
@@ -253,13 +253,16 @@ if __name__=='__main__':
     english_sentences = [sentence.rstrip('\n') for sentence in english_sentences]
     chinese_sentences = [sentence.rstrip('\n') for sentence in chinese_sentences]
 
-    vaild_sentence_indicies = []
+    valid_sentence_indicies = []
     for index in range(len(chinese_sentences)):
         chinese_sentence, english_sentence = chinese_sentences[index], english_sentences[index]
         if is_valid_zh_length(chinese_sentence, max_sequence_length=max_sequence_length) \
             and is_valid_eng_length(english_sentence, max_sequence_length=max_sequence_length) \
             and is_valid_tokens(chinese_sentence, chinese_vocabulary):
-                vaild_sentence_indicies.append(index)
+                valid_sentence_indicies.append(index)
+    
+    chinese_sentences = [chinese_sentences[i] for i in valid_sentence_indicies]
+    english_sentences = [english_sentences[i] for i in valid_sentence_indicies]
 
     dataset = TextDataset(english_sentences, chinese_sentences)
 
