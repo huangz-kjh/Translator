@@ -50,7 +50,7 @@ class Normalnize(nn.Module):
         mean = inputs.mean(dim=dims, keepdim=True)
         var = ((inputs - mean) ** 2).mean(dim=dims, keepdim=True)
         std = (var + self.eps).sqrt()
-        y = (inputs - var) / std
+        y = (inputs - mean) / std
         out = self.gamma * y + self.beta
         return out
 

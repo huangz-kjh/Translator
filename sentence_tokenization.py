@@ -130,7 +130,14 @@ def create_mask(eng_batch, zh_batch):
     decoder_padding_mask_cross_attention = torch.full([num_sentences, max_sequence_length, max_sequence_length], False)
 
     for idx in range(num_sentences):
-        eng_sentence_length, zh_sentence_length = len(eng_batch[idx]), len(zh_batch[idx])
+        eng_sentence_length = len(
+                    re.findall(
+                        r"[a-z]+|[0-9]+|[^\w\s]",
+                        eng_batch[idx].lower()
+                    )
+            )
+
+        zh_sentence_length = len(list(zh_batch[idx]))
         eng_chars_to_padding_mask = np.arange(eng_sentence_length + 1, max_sequence_length)
         zh_chars_to_padding_mask = np.arange(zh_sentence_length + 1, max_sequence_length)
         encoder_padding_mask[idx, :, eng_chars_to_padding_mask] = True
