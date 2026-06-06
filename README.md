@@ -4,8 +4,6 @@
 
 本项目提供了一个完整的 Transformer 架构实现，包括编码器、解码器、多头注意力、位置编码等核心组件。
 
-![Transformer Architecture](Transformer_Architecture_complete.png)
-
 ## 项目概述
 
 Transformer 是一种基于自注意力机制的深度学习模型，由 Google 在 2017 年提出。本项目完整实现了 Transformer 的所有关键组件，并训练了一个英中翻译模型。
@@ -29,20 +27,8 @@ Transformer 是一种基于自注意力机制的深度学习模型，由 Google 
 ├── sentence_tokenization.py    # 分词和句子嵌入
 ├── tf.py                       # Transformer 模型封装
 ├── translator.ipynb            # 训练和推理 notebook
-├── Transformer_Trainer_Notebook.ipynb  # 完整训练流程
-├── Self_Attention_for_Transformer_Neural_Networks.ipynb  # 自注意力机制教程
-├── Mutlihead_Attention.ipynb   # 多头注意力教程
-├── Layer_Normalization.ipynb   # 层归一化教程
-├── Positional_Encoding_in_Transformer_neural_networks.ipynb  # 位置编码教程
-├── Transformer_Encoder_EXPLAINED!.ipynb  # 编码器教程
-├── Transformer_Decoder_EXPLAINED!.ipynb  # 解码器教程
-├── Sentence_Tokenization.ipynb # 分词教程（英文）
-├── Sentence_Tokenization_zh.ipynb  # 分词教程（中文）
 ├── dataset/                    # 训练数据集
 │   ├── ch/                     # 中英平行语料
-│   ├── english.txt             # 英文数据（卡纳达语）
-│   └── kannada.txt             # 卡纳达语数据
-└── requirements.txt            # Python 依赖
 ```
 
 ## 核心组件
@@ -208,36 +194,3 @@ translation = translate("The use of remote sensing satellite data.", transformer
 2. 过滤包含未知 token 的句子
 3. 构建词汇表映射
 
-## 学习资源
-
-本项目配套了详细的 YouTube 视频教程：
-
-[**完整播放列表**](https://www.youtube.com/playlist?list=PLTl9hO2Oobd97qfWC40gOSU8C0iu0m2l4)
-
-各组件详细讲解：
-- [自注意力机制](Self_Attention_for_Transformer_Neural_Networks.ipynb)
-- [多头注意力](Mutlihead_Attention.ipynb)
-- [层归一化](Layer_Normalization.ipynb)
-- [位置编码](Positional_Encoding_in_Transformer_neural_networks.ipynb)
-- [编码器](Transformer_Encoder_EXPLAINED!.ipynb)
-- [解码器](Transformer_Decoder_EXPLAINED!.ipynb)
-- [分词（英文）](Sentence_Tokenization.ipynb)
-- [分词（中文）](Sentence_Tokenization_zh.ipynb)
-
-## 模型架构图
-
-![Transformer Architecture](Transformer_Architecture_complete.png)
-
-详细架构图文件：`Transformer_Architecture_complete.drawio`
-
-## 许可证
-
-本项目采用 MIT 许可证 - 详见 [LICENSE](LICENSE) 文件。
-
-## 作者
-
-Ajay Halthor
-
-## 致谢
-
-本项目受 "Attention Is All You Need" 论文启发，实现了一个教学版本的 Transformer 模型。
